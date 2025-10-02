@@ -65,6 +65,13 @@ export function makeServer(opts: GraylogOpts) {
     }
   );
 
+  // Ensure clients see tools immediately after initialization
+  // (some clients rely on this notification to refresh tool list)
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  (server as any).server.oninitialized = async () => {
+    server.sendToolListChanged();
+  };
+
   return {
     connectStdio: async () => server.connect(new StdioServerTransport())
   };
