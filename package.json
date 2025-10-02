@@ -1,6 +1,6 @@
 {
   "name": "@alexbuzo/graylog-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/cli.js",
   "types": "dist/cli.d.ts",
   "scripts": {
@@ -12,7 +12,13 @@
     "type": "git",
     "url": "git+https://github.com/abuzo/graylog-mcp"
   },
-  "keywords": ["graylog", "mcp", "model-context-protocol", "cli", "logs"],
+  "keywords": [
+    "graylog",
+    "mcp",
+    "model-context-protocol",
+    "cli",
+    "logs"
+  ],
   "author": "Aliaksei Buzo aliakseibuzo@gmail.com",
   "license": "MIT",
   "description": "Graylog MCP server exposing search tools over stdio",
