@@ -1,6 +1,6 @@
 {
   "name": "@alexbuzo/graylog-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "dist/cli.js",
   "types": "dist/cli.d.ts",
   "scripts": {
@@ -32,6 +32,9 @@
       "default": "./dist/cli.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=18"
   },
