@@ -36,7 +36,22 @@ export function makeServer(opts: GraylogOpts) {
         ts: m.message?.timestamp,
         level: m.message?.level,
         source: m.message?.source,
+        container: m.message?.container ?? m.message?.container_name ?? m.message?.["kubernetes.container_name"],
         short_message: m.message?.short_message,
+        message: m.message?.message ?? m.message?.full_message ?? m.message?.short_message,
+        request: m.message?.request ?? m.message?.http_request ?? m.message?.req ?? m.message?.request_body,
+        response: m.message?.response ?? m.message?.http_response ?? m.message?.res ?? m.message?.response_body,
+        http_method: m.message?.method ?? m.message?.http_method ?? m.message?.request_method,
+        url: m.message?.url ?? m.message?.path ?? m.message?.request_path,
+        status: m.message?.status ?? m.message?.http_status ?? m.message?.response_status,
+        latency_ms: m.message?.latency_ms ?? m.message?.duration_ms ?? m.message?.response_time_ms,
+        trace_id: m.message?.traceId ?? m.message?.trace_id ?? m.message?.["trace.id"],
+        span_id: m.message?.spanId ?? m.message?.span_id ?? m.message?.["span.id"],
+        request_id: m.message?.request_id ?? m.message?.req_id ?? m.message?.requestId,
+        tenant_id: m.message?.tenant_id ?? m.message?.tenantId ?? m.message?.tenant,
+        client_ip: m.message?.client_ip ?? m.message?.remote_addr ?? m.message?.ip,
+        user_agent: m.message?.user_agent ?? m.message?.agent,
+        service: m.message?.service ?? m.message?.service_name ?? m.message?.app,
       }));
       return { content: [{ type: "text", text: JSON.stringify({ total: r.total_results, messages }, null, 2) }] };
     }
@@ -59,7 +74,25 @@ export function makeServer(opts: GraylogOpts) {
       const res = await streamMessages(streamId, params, opts);
       const r: any = res as any;
       const messages = (r?.messages ?? []).map((m: any) => ({
-        id: m.message?._id, ts: m.message?.timestamp, source: m.message?.source, short_message: m.message?.short_message
+        id: m.message?._id,
+        ts: m.message?.timestamp,
+        source: m.message?.source,
+        container: m.message?.container ?? m.message?.container_name ?? m.message?.["kubernetes.container_name"],
+        short_message: m.message?.short_message,
+        message: m.message?.message ?? m.message?.full_message ?? m.message?.short_message,
+        request: m.message?.request ?? m.message?.http_request ?? m.message?.req ?? m.message?.request_body,
+        response: m.message?.response ?? m.message?.http_response ?? m.message?.res ?? m.message?.response_body,
+        http_method: m.message?.method ?? m.message?.http_method ?? m.message?.request_method,
+        url: m.message?.url ?? m.message?.path ?? m.message?.request_path,
+        status: m.message?.status ?? m.message?.http_status ?? m.message?.response_status,
+        latency_ms: m.message?.latency_ms ?? m.message?.duration_ms ?? m.message?.response_time_ms,
+        trace_id: m.message?.traceId ?? m.message?.trace_id ?? m.message?.["trace.id"],
+        span_id: m.message?.spanId ?? m.message?.span_id ?? m.message?.["span.id"],
+        request_id: m.message?.request_id ?? m.message?.req_id ?? m.message?.requestId,
+        tenant_id: m.message?.tenant_id ?? m.message?.tenantId ?? m.message?.tenant,
+        client_ip: m.message?.client_ip ?? m.message?.remote_addr ?? m.message?.ip,
+        user_agent: m.message?.user_agent ?? m.message?.agent,
+        service: m.message?.service ?? m.message?.service_name ?? m.message?.app,
       }));
       return { content: [{ type: "text", text: JSON.stringify({ messages }, null, 2) }] };
     }
