@@ -57,6 +57,58 @@ export function makeServer(opts: GraylogOpts) {
     }
   );
 
+  // tool: smart UUID search - tries multiple fields
+  server.registerTool(
+    "graylog.search_uuid",
+    {
+      description: "Smart search for UUID across common fields (request_id, trace_id, etc.). Automatically tries multiple field names.",
+      inputSchema: {
+        uuid: z.string().describe('UUID to search for'),
+        rangeSec: z.number().int().positive().default(86400),
+        limit: z.number().int().positive().max(500).optional(),
+      }
+    },
+    async ({ uuid, rangeSec, limit }) => {
+      const fields = [
+        'request_id', 'requestId', 'req_id',
+        'trace_id', 'traceId', 'trace.id',
+        'span_id', 'spanId', 'span.id',
+        'transaction_id', 'transactionId',
+        'correlation_id', 'correlationId',
+        '_id'
+      ];
+      
+      const queries = fields.map(f => `${f}:${uuid}`);
+      const fullQuery = queries.join(' OR ');
+      
+      const params = { query: fullQuery, rangeSec, limit: limit ?? 200 };
+      const res = await searchRelative(params, opts);
+      const r: any = res as any;
+      const messages = (r?.messages ?? []).map((m: any) => ({
+        id: m.message?._id,
+        ts: m.message?.timestamp,
+        level: m.message?.level,
+        source: m.message?.source,
+        container: m.message?.container ?? m.message?.container_name ?? m.message?.["kubernetes.container_name"],
+        message: m.message?.message ?? m.message?.full_message ?? m.message?.short_message,
+        request: m.message?.request ?? m.message?.http_request ?? m.message?.req ?? m.message?.request_body,
+        response: m.message?.response ?? m.message?.http_response ?? m.message?.res ?? m.message?.response_body,
+        http_method: m.message?.method ?? m.message?.http_method ?? m.message?.request_method,
+        url: m.message?.url ?? m.message?.path ?? m.message?.request_path,
+        status: m.message?.status ?? m.message?.http_status ?? m.message?.response_status,
+        latency_ms: m.message?.latency_ms ?? m.message?.duration_ms ?? m.message?.response_time_ms,
+        trace_id: m.message?.traceId ?? m.message?.trace_id ?? m.message?.["trace.id"],
+        span_id: m.message?.spanId ?? m.message?.span_id ?? m.message?.["span.id"],
+        request_id: m.message?.request_id ?? m.message?.req_id ?? m.message?.requestId,
+        tenant_id: m.message?.tenant_id ?? m.message?.tenantId ?? m.message?.tenant,
+        client_ip: m.message?.client_ip ?? m.message?.remote_addr ?? m.message?.ip,
+        user_agent: m.message?.user_agent ?? m.message?.agent,
+        service: m.message?.service ?? m.message?.service_name ?? m.message?.app,
+      }));
+      return { content: [{ type: "text", text: JSON.stringify({ total: r.total_results, messages, query_used: fullQuery }, null, 2) }] };
+    }
+  );
+
   // tool: messages for a specific stream
   server.registerTool(
     "graylog.search_stream",

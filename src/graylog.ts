@@ -32,9 +32,16 @@ export async function glGet(path: string, opts: GraylogOpts, query?: Record<stri
 export async function searchRelative(q: {
   query: string; rangeSec: number; limit?: number; offset?: number; filter?: string;
 }, opts: GraylogOpts) {
-  return glGet("/api/search/universal/relative", opts, {
-    query: q.query, range: q.rangeSec, limit: q.limit ?? 150, offset: q.offset ?? 0, filter: q.filter ?? ""
-  });
+  const params: Record<string, string | number> = {
+    query: q.query,
+    range: q.rangeSec,
+    limit: q.limit ?? 150,
+    offset: q.offset ?? 0
+  };
+  if (q.filter && q.filter.trim()) {
+    params.filter = q.filter;
+  }
+  return glGet("/api/search/universal/relative", opts, params);
 }
 
 /** Example API for stream: /api/streams/{id}/messages */
